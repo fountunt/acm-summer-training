@@ -1,0 +1,13 @@
+# Windows executables
+*.exe
+
+# VSCode settings (keep your personal settings local)
+.vscode/settings.local.json
+
+# Competitive Programming Helper (CPH) cache files
+.cph/
+divyanshuagrawal.competitive-programming-helper/
+
+# Compiled binaries
+*.o
+*.out

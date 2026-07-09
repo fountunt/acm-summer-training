@@ -20,7 +20,7 @@ void solve()
         (S - F[2])/2,
         (S - F[1])/2
     }) << endl;
-    
+
 }
 
 signed main()
