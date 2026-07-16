@@ -1,0 +1,66 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "C/C++: g++.exe 编译当前文件",
+            "type": "cppbuild",
+            "command": "C:/msys64/mingw64/bin/g++.exe",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-std=c++17",
+                "-g3",
+                "-Wall",
+                "-Wextra",
+                "${file}",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}.exe"
+            ],
+            "problemMatcher": ["$gcc"],
+            "group": "build",
+            "detail": "编译当前文件，用作调试的预编译任务"
+        },
+        {
+            "label": "🔨 编译并运行（手动输入）",
+            "type": "shell",
+            "command": "cd \"${fileDirname}\" && g++ -std=c++17 -g3 -Wall -Wextra \"${file}\" -o \"${fileDirname}/${fileBasenameNoExtension}.exe\" && echo '' && echo '========== 运行结果 ==========' && \"${fileDirname}/${fileBasenameNoExtension}.exe\"",
+            "problemMatcher": ["$gcc"],
+            "presentation": {
+                "panel": "integrated",
+                "clear": true,
+                "showReuseMessage": false,
+                "group": "cpp"
+            },
+            "detail": "编译并在终端中运行，可手动输入测试数据"
+        },
+        {
+            "label": "🔨 编译并运行 (input.txt)",
+            "type": "shell",
+            "command": "cd \"${fileDirname}\" && g++ -std=c++17 -g3 -Wall -Wextra \"${file}\" -o \"${fileDirname}/${fileBasenameNoExtension}.exe\" && echo '' && echo '========== 运行结果 ==========' && \"${fileDirname}/${fileBasenameNoExtension}.exe\" < input.txt",
+            "problemMatcher": ["$gcc"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "panel": "integrated",
+                "clear": true,
+                "showReuseMessage": false,
+                "group": "cpp"
+            },
+            "detail": "编译当前文件，从同目录 input.txt 重定向输入"
+        },
+        {
+            "label": "▶ 仅运行 (input.txt)",
+            "type": "shell",
+            "command": "cd \"${fileDirname}\" && echo '========== 运行结果 ==========' && \"${fileDirname}/${fileBasenameNoExtension}.exe\" < input.txt",
+            "problemMatcher": [],
+            "presentation": {
+                "panel": "integrated",
+                "clear": true,
+                "showReuseMessage": false,
+                "group": "cpp"
+            },
+            "detail": "不重新编译，直接用 input.txt 运行已有的 exe"
+        }
+    ]
+}

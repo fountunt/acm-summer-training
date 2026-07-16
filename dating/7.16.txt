@@ -1,0 +1,15 @@
+已完成：
+欧拉筛
+
+基本完成：
+MST
+DSU
+
+待完成：
+树上倍增
+SPAF
+NTT
+Bostan_MORI 线性递推
+Fenwick Tree
+链式前向星
+线段树
