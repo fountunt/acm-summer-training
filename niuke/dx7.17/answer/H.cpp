@@ -1,133 +1,92 @@
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
 using namespace std;
+
 using ll = long long;
+using array3 = array<int, 3>;
 
-int trans[10][3][3];
-map<vector<int>, int> hand_to_id;
-vector<vector<int>> id_to_hand(10);
-long double dp[5005][10][10];
+const int UP = 1000;
+int id[4][4], tot;
+array3 state[22];
+double f[UP + 10][11][11];
 
-// 计分函数：0-R, 1-S, 2-P
-int get_score(int a, int b) {
-    if (a == b) return 1;
-    if ((a == 0 && b == 1) || (a == 1 && b == 2) || (a == 2 && b == 0)) return 3;
-    return 0;
+void work()
+{
+    int b;
+    cin >> b;
+    vector<int> a;
+    for (int i = 1; i <= 2; ++i)
+    {
+        string str;
+        cin >> str;
+        int cntR = count(str.begin(), str.end(), 'R');
+        int cntS = count(str.begin(), str.end(), 'S');
+        a.push_back(id[cntR][cntS]);
+    }
+    double ans;
+    if (b <= UP) ans = f[b][a[0]][a[1]];
+    else ans = f[UP][a[0]][a[1]] + (b - UP) * (f[UP][a[0]][a[1]] - f[UP - 1][a[0]][a[1]]);
+    cout << setprecision(10) << ans << "\n";
 }
 
-// 预处理所有状态和 DP 值
-void precompute() {
-    int cnt = 0;
-    // 生成所有 10 种手牌组合
-    for (int i = 0; i <= 2; ++i) {
-        for (int j = i; j <= 2; ++j) {
-            for (int k = j; k <= 2; ++k) {
-                vector<int> h = {i, j, k};
-                hand_to_id[h] = cnt;
-                id_to_hand[cnt] = h;
-                cnt++;
-            }
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    // 预处理所有状态 (三元组 (R,S,O) 和为3)
+    for (int i = 0; i <= 3; ++i)
+    {
+        for (int j = 0; j <= 3 - i; ++j)
+        {
+            id[i][j] = ++tot;
+            state[tot] = {i, j, 3 - i - j};
         }
     }
 
-    // 预处理打牌和抽牌后的状态转移
-    for (int u = 0; u < 10; ++u) {
-        for (int c = 0; c < 3; ++c) {
-            for (int n = 0; n < 3; ++n) {
-                vector<int> h = id_to_hand[u];
-                bool found = false;
-                for (int i = 0; i < 3; ++i) {
-                    if (h[i] == c) {
-                        h.erase(h.begin() + i);
-                        found = true;
-                        break;
-                    }
-                }
-                if (found) {
-                    h.push_back(n);
-                    sort(h.begin(), h.end());
-                    trans[u][c][n] = hand_to_id[h];
-                } else {
-                    trans[u][c][n] = -1; // 手牌中没有卡牌 c
-                }
-            }
-        }
-    }
-
-    // 进行马尔可夫决策过程 (MDP) 迭代
-    for (int k = 1; k <= 5000; ++k) {
-        for (int u = 0; u < 10; ++u) {
-            for (int v = 0; v < 10; ++v) {
-                long double max_A = -1.0;
-                for (int cA = 0; cA < 3; ++cA) {
-                    if (trans[u][cA][0] == -1) continue; // Alice 没有 cA
-                    long double min_B = 1e18;
-                    for (int cB = 0; cB < 3; ++cB) {
-                        if (trans[v][cB][0] == -1) continue; // Bob 没有 cB
-
-                        long double expected_future = 0.0;
-                        for (int nA = 0; nA < 3; ++nA) {
-                            int nu = trans[u][cA][nA];
-                            for (int nB = 0; nB < 3; ++nB) {
-                                int nv = trans[v][cB][nB];
-                                expected_future += dp[k - 1][nu][nv];
+    // DP 递推
+    for (int T = 1; T <= UP; ++T)
+    {
+        for (int x = 1; x <= 10; ++x)
+        {
+            for (int y = 1; y <= 10; ++y)
+            {
+                array3 a = state[x], b = state[y];
+                double best = -1e18;
+                for (int i = 0; i < 3; ++i) if (a[i])
+                {
+                    --a[i];
+                    double worst = 1e18;
+                    for (int j = 0; j < 3; ++j) if (b[j])
+                    {
+                        --b[j];
+                        double s = 0;
+                        if (i == j) s = 1;
+                        else if ((i + 1) % 3 == j) s = 3;
+                        // 随机恢复一个资源 (9种等概率组合)
+                        for (int u = 0; u < 3; ++u)
+                        {
+                            for (int v = 0; v < 3; ++v)
+                            {
+                                ++a[u];
+                                ++b[v];
+                                s += f[T - 1][id[a[0]][a[1]]][id[b[0]][b[1]]] / 9.0;
+                                --a[u];
+                                --b[v];
                             }
                         }
-                        expected_future /= 9.0;
-
-                        long double current_score = get_score(cA, cB) + expected_future;
-                        if (current_score < min_B) {
-                            min_B = current_score; // Bob 尽量最小化得分
-                        }
+                        worst = min(worst, s);
+                        ++b[j];
                     }
-                    if (min_B > max_A) {
-                        max_A = min_B; // Alice 尽量最大化最小得分
-                    }
+                    best = max(best, worst);
+                    ++a[i];
                 }
-                dp[k][u][v] = max_A;
+                f[T][x][y] = best;
             }
         }
     }
-}
 
-void solve() {
-    long long k;
-    string sA, sB;
-    cin >> k >> sA >> sB;
-
-    auto get_id = [&](string s) {
-        vector<int> h(3);
-        for (int i = 0; i < 3; ++i) {
-            if (s[i] == 'R') h[i] = 0;
-            else if (s[i] == 'S') h[i] = 1;
-            else if (s[i] == 'P') h[i] = 2;
-        }
-        sort(h.begin(), h.end());
-        return hand_to_id[h];
-    };
-
-    int u = get_id(sA);
-    int v = get_id(sB);
-
-    // 对于足够大的 k，利用 MDP 的极限线性增量来直接进行常数推断 O(1)
-    if (k <= 5000) {
-        cout << fixed << setprecision(12) << dp[k][u][v] << "\n";
-    } else {
-        long double g = dp[5000][u][v] - dp[4999][u][v];
-        long double ans = dp[5000][u][v] + (long double)(k - 5000) * g;
-        cout << fixed << setprecision(12) << ans << "\n";
-    }
-}
-
-int main() {
-    ios::sync_with_stdio(0);
-    cin.tie(0);
-
-    precompute();
-
-    int t;
-    if (cin >> t) {
-        while (t--) solve();
-    }
-
+    int T;
+    cin >> T;
+    while (T--) work();
     return 0;
 }

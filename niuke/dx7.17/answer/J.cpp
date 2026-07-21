@@ -1,183 +1,156 @@
-#include<bits/stdc++.h>
+#include <iostream>
+#include <vector>
+#include <utility>
 using namespace std;
-using ll = long long;
 
-struct Card {
-    int rank;
-    int suit;
+enum Poker {
+    HIGH_CARD, ONE_PAIR, TWO_PAIR, THREE_OF_A_KIND,
+    STRAIGHT, FLUSH, FULL_HOUSE, FOUR_OF_A_KIND, STRAIGHT_FLUSH
 };
 
-int rank_val(char c) {
-    if(c >= '2' && c <= '9') return c - '0';
-    if(c == 'T') return 10;
-    if(c == 'J') return 11;
-    if(c == 'Q') return 12;
-    if(c == 'K') return 13;
-    if(c == 'A') return 14;
-    return 0;
+int bsr(int a) {
+    return 31 - __builtin_clz(a);
 }
 
-int suit_val(char c) {
-    if(c == 'C') return 0;
-    if(c == 'D') return 1;
-    if(c == 'H') return 2;
-    if(c == 'S') return 3;
-    return 0;
+int highBits(int a, int k) {
+    int b = 0;
+    for (int i = 0; i < k; ++i) {
+        if (!a) return -1;
+        b |= 1 << (31 - __builtin_clz(a));
+        a &= ~b;
+    }
+    return b;
 }
 
-Card parse(string s) {
-    return {rank_val(s[0]), suit_val(s[1])};
+const char RANKS_STR[16] = "0123456789TJQKA";
+const char SUITS_STR[5] = "CDHS";
+
+int parseCard(const char *str) {
+    int r, s;
+    for (s = 0; s < 4; ++s) if (SUITS_STR[s] == str[1]) break;
+    if (s < 4) {
+        for (r = 2; r < 15; ++r) if (RANKS_STR[r] == str[0]) break;
+    } else {
+        for (s = 0; s < 4; ++s) if (SUITS_STR[s] == str[0]) break;
+        for (r = 2; r < 15; ++r) if (RANKS_STR[r] == str[1]) break;
+    }
+    return (r - 2) << 2 | s;
+}//牌型转码
+
+int readCard() {
+    static char buf[3];
+    cin >> buf;
+    return parseCard(buf);
 }
 
-int get_id(Card c) {
-    return c.suit * 13 + (c.rank - 2);
+pair<Poker, int> poker(const vector<int>& cards)
+{
+    int a = 0, bs[4] = {}, cs[15] = {}, ds[5] = {};
+    for (int card : cards)
+    {
+        int r = (card >> 2) + 2;
+        int s = card & 3;
+        a |= bs[s] |= 1 << r;
+        ++cs[r];
+    }
+    for (int r = 2; r < 15; ++r) ds[cs[r]] |= 1 << r;
+
+    // STRAIGHT_FLUSH
+    {
+        int straightFlush = 0;
+        for (int s = 0; s < 4; ++s)
+            straightFlush |= bs[s] & bs[s] << 1 & bs[s] << 2 & bs[s] << 3
+                           & (bs[s] << 4 | bs[s] >> 14 << 5);
+        if (straightFlush) return make_pair(STRAIGHT_FLUSH, bsr(straightFlush));
+    }
+
+    // FOUR_OF_A_KIND
+    if (ds[4]) {
+        int r4 = bsr(ds[4]);
+        return make_pair(FOUR_OF_A_KIND, r4 << 4 | bsr(a ^ (1 << r4)));
+    }
+
+    // FULL_HOUSE
+    if (ds[3]) {
+        int r3 = bsr(ds[3]);
+        int d = (ds[3] ^ (1 << r3)) | ds[2];
+        if (d) {
+            int r2 = bsr(d);
+            return make_pair(FULL_HOUSE, r3 << 4 | r2);
+        }
+    }
+
+    // FLUSH
+    {
+        int flush = -1;
+        for (int s = 0; s < 4; ++s) {
+            int h = highBits(bs[s], 5);
+            if (flush < h) flush = h;
+        }
+        if (flush >= 0) return make_pair(FLUSH, flush);
+    }
+
+    // STRAIGHT
+    {
+        int straight = a & a << 1 & a << 2 & a << 3 & (a << 4 | a >> 14 << 5);
+        if (straight) return make_pair(STRAIGHT, bsr(straight));
+    }
+
+    // THREE_OF_A_KIND
+    if (ds[3]) {
+        int r3 = bsr(ds[3]);
+        return make_pair(THREE_OF_A_KIND, r3 << 16 | highBits(a ^ (1 << r3), 2));
+    }
+
+    // TWO_PAIR / ONE_PAIR
+    if (ds[2]) {
+        int r2 = bsr(ds[2]);
+        int d = ds[2] ^ (1 << r2);
+        if (d) {
+            int r22 = bsr(d);
+            return make_pair(TWO_PAIR, r2 << 8 | r22 << 4 | bsr(a ^ (1 << r2) ^ (1 << r22)));
+        }
+        return make_pair(ONE_PAIR, r2 << 16 | highBits(a ^ (1 << r2), 3));
+    }
+
+    // HIGH_CARD
+    return make_pair(HIGH_CARD, highBits(a, 5));
 }
 
-Card get_card(int id) {
-    return {id % 13 + 2, id / 13};
-}
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
 
-uint32_t make_sig(int type, int v1=0, int v2=0, int v3=0, int v4=0, int v5=0) {
-    return (type << 20) | (v1 << 16) | (v2 << 12) | (v3 << 8) | (v4 << 4) | v5;
-}
+    int numCases;
+    while (cin >> numCases)
+    {
+        for (int caseId = 1; caseId <= numCases; ++caseId)
+        {
+            int A[8];
+            for (int i = 0; i < 8; ++i) A[i] = readCard();
 
-uint32_t eval_hand(Card c1, Card c2, Card c3, Card c4, Card c5) {
-    Card hand[5] = {c1, c2, c3, c4, c5};
-    for(int i = 0; i < 5; ++i) {
-        for(int j = i + 1; j < 5; ++j) {
-            if(hand[i].rank < hand[j].rank) {
-                swap(hand[i], hand[j]);
+            bool used[52] = {};
+            for (int i = 0; i < 8; ++i) used[A[i]] = true;
+
+            int ans = 1;
+            for (int y = 0; y < 52; ++y) if (!used[y])
+            {
+                auto you = poker({A[4], A[5], A[6], A[7], y});
+                int mx = -1;
+                for (int x = 0; x < 52; ++x) if (!used[x] && y != x)
+                {
+                    auto me = poker({A[0], A[1], A[2], A[3], x});
+                    if (me > you) { mx = 1; break; }
+                    else if (me == you) { mx = 0; }
+                }
+                if (mx < ans) ans = mx;
+                if (ans < 0) break;
             }
+
+            if (ans > 0) cout << "WoYaoYanPai\n";
+            else if (ans < 0) cout << "GeiWoCaPiXie\n";
+            else cout << "PaiMeiYouWenTi\n";
         }
     }
-
-    bool is_flush = true;
-    for(int i = 1; i < 5; ++i) {
-        if(hand[i].suit != hand[0].suit) is_flush = false;
-    }
-
-    bool is_straight = false;
-    int straight_high = 0;
-
-    if(hand[0].rank == hand[1].rank + 1 &&
-       hand[1].rank == hand[2].rank + 1 &&
-       hand[2].rank == hand[3].rank + 1 &&
-       hand[3].rank == hand[4].rank + 1) {
-        is_straight = true;
-        straight_high = hand[0].rank;
-    } else if(hand[0].rank == 14 && hand[1].rank == 5 &&
-              hand[2].rank == 4 && hand[3].rank == 3 && hand[4].rank == 2) {
-        is_straight = true;
-        straight_high = 5;
-    }
-
-    if(is_straight && is_flush) return make_sig(8, straight_high);
-
-    int counts[15] = {0};
-    for(int i = 0; i < 5; ++i) counts[hand[i].rank]++;
-
-    int quad = 0, trips = 0, pair1 = 0, pair2 = 0;
-    for(int i = 14; i >= 2; --i) {
-        if(counts[i] == 4) quad = i;
-        else if(counts[i] == 3) trips = i;
-        else if(counts[i] == 2) {
-            if(pair1 == 0) pair1 = i;
-            else pair2 = i;
-        }
-    }
-
-    if(quad) {
-        int kicker = 0;
-        for(int i = 0; i < 5; ++i) if(hand[i].rank != quad) kicker = hand[i].rank;
-        return make_sig(7, quad, kicker);
-    }
-    if(trips && pair1) {
-        return make_sig(6, trips, pair1);
-    }
-    if(is_flush) {
-        return make_sig(5, hand[0].rank, hand[1].rank, hand[2].rank, hand[3].rank, hand[4].rank);
-    }
-    if(is_straight) {
-        return make_sig(4, straight_high);
-    }
-    if(trips) {
-        int k[2], idx = 0;
-        for(int i = 0; i < 5; ++i) if(hand[i].rank != trips) k[idx++] = hand[i].rank;
-        return make_sig(3, trips, k[0], k[1]);
-    }
-    if(pair1 && pair2) {
-        int kicker = 0;
-        for(int i = 0; i < 5; ++i) if(hand[i].rank != pair1 && hand[i].rank != pair2) kicker = hand[i].rank;
-        return make_sig(2, pair1, pair2, kicker);
-    }
-    if(pair1) {
-        int k[3], idx = 0;
-        for(int i = 0; i < 5; ++i) if(hand[i].rank != pair1) k[idx++] = hand[i].rank;
-        return make_sig(1, pair1, k[0], k[1], k[2]);
-    }
-
-    return make_sig(0, hand[0].rank, hand[1].rank, hand[2].rank, hand[3].rank, hand[4].rank);
-}
-
-void solve()
-{
-    string s;
-    vector<Card> my(4), op(4);
-    bool used[52] = {false};
-
-    for(int i = 0; i < 4; ++i) {
-        cin >> s;
-        my[i] = parse(s);
-        used[get_id(my[i])] = true;
-    }
-    for(int i = 0; i < 4; ++i) {
-        cin >> s;
-        op[i] = parse(s);
-        used[get_id(op[i])] = true;
-    }
-
-    uint32_t my_vals[52] = {0};
-    uint32_t op_vals[52] = {0};
-
-    for(int i = 0; i < 52; ++i) {
-        if(used[i]) continue;
-        Card c = get_card(i);
-        my_vals[i] = eval_hand(my[0], my[1], my[2], my[3], c);
-        op_vals[i] = eval_hand(op[0], op[1], op[2], op[3], c);
-    }
-
-    int overall = 2;
-    for(int i = 0; i < 52; ++i) {
-        if(used[i]) continue;
-
-        int my_best = -2;
-        for(int j = 0; j < 52; ++j) {
-            if(used[j] || i == j) continue;
-
-            int cmp = 0;
-            if(my_vals[j] > op_vals[i]) cmp = 1;
-            else if(my_vals[j] < op_vals[i]) cmp = -1;
-
-            my_best = max(my_best, cmp);
-        }
-        overall = min(overall, my_best);
-    }
-
-    if(overall == 1) cout << "WoYaoYanPai\n";
-    else if(overall == -1) cout << "GeiWoCaPiXie\n";
-    else cout << "PaiMeiYouWenTi\n";
-}
-
-int main()
-{
-    ios::sync_with_stdio(0);
-    cin.tie(0);
-
-    int t;
-    cin >> t;
-
-    while(t--)
-    solve();
-
     return 0;
 }
