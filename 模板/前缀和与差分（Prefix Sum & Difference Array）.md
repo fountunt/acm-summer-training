@@ -42,6 +42,7 @@ auto range_sum = [&](int l, int r) -> long long {
 vector<int> pxor(n + 1, 0);
 for (int i = 1; i <= n; ++i) pxor[i] = pxor[i - 1] ^ a[i];
 // [l, r] 异或 = pxor[r] ^ pxor[l - 1]
+//0-1 反转问题可以用这个来求
 
 // 前缀积（取模，配合逆元）
 vector<int> prod(n + 1, 1), inv(n + 1, 1);
@@ -99,7 +100,7 @@ for (int i = 1; i <= n; ++i) {
 
 ### 多次差分（区间加等差数列）
 
-> 对区间 [l, r] 加上首项为 s、公差为 d 的等差数列：  
+> 对区间 [l, r] 加上首项为 s、公差为 d 的等差数列：
 > a[l] += s, a[l+1] += s+d, ..., a[r] += s + (r-l)*d
 
 用**二阶差分**实现：
