@@ -315,6 +315,60 @@ for (int b = 0; b < n; ++b)
 //         dp[mask] += dp[mask | (1 << b)];
 ```
 
+### SOS DP 预处理贡献 + 状压转移
+
+适用：将 n 个物品分配给 m 个类别/特征（m ≤ 20），每个物品的贡献由其特征子集决定。
+思路：先用 SOS DP 对每种特征 j 预处理当前掩码下（已选特征的子集）可用的总贡献，
+再状压转移 `dp[mask] → dp[mask|(1<<j)] = min(dp[mask] + cost[mask][j])`。
+
+```cpp
+// 例：n 个物品，m 个特征，每个物品有特征掩码 A[i] 和费用 d[i][j]
+// 求覆盖所有特征的最小总费用
+
+// 1. 输入 & 预处理每个特征掩码对每个特征的总费用
+vector<int> A(n, 0);
+vector<vector<ll>> d(n, vector<ll>(m));
+for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) cin >> d[i][j];
+    string s; cin >> s;
+    for (int j = 0; j < m; j++)
+        if (s[j] == 'A') A[i] |= (1 << j);
+}
+
+vector<vector<ll>> cost(1 << m, vector<ll>(m, 0));
+for (int i = 0; i < n; i++)
+    for (int j = 0; j < m; j++)
+        cost[A[i]][j] += d[i][j];
+
+// 2. SOS DP：对每个特征 j，将子集掩码的贡献累加到其超集
+for (int b = 0; b < m; b++)
+    for (int mask = 0; mask < (1 << m); mask++)
+        if (mask & (1 << b)) {
+            int sub = mask ^ (1 << b);
+            for (int j = 0; j < m; j++)
+                cost[sub][j] += cost[mask][j];
+        }
+
+// 3. 状压 DP 求最小费用
+vector<ll> dp(1 << m, INF);
+dp[0] = 0;
+for (int mask = 0; mask < (1 << m); mask++) {
+    if (dp[mask] == INF) continue;
+    int rem = ((1 << m) - 1) ^ mask;   // 未选特征
+    while (rem) {
+        int lsb = rem & -rem;
+        int j = __builtin_ctz(lsb);
+        int new_mask = mask | lsb;
+        ll val = dp[mask] + cost[mask][j];
+        if (val < dp[new_mask]) dp[new_mask] = val;
+        rem ^= lsb;
+    }
+}
+cout << dp[(1 << m) - 1] << "\n";
+```
+
+> **要点**：SOS DP 把每个特征掩码的总费用按子集归属聚合好，状压 DP 枚举未选特征用 `lsb` 技巧使内层 O(m) → O(popcount(rem))，总复杂度 O(m·2^m + 2^m)。
+
 ---
 
 ## 七、概率 / 期望 DP
