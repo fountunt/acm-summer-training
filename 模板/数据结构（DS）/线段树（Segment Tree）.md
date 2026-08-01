@@ -208,7 +208,7 @@ struct SegTreeBeats {
 
     void apply_add(int p, int l, int r, long long v) {
         t[p].mx += v;
-        if (t[p].se != -1e18) t[p].se += v;
+        if (t[p].cnt < (r - l + 1)) t[p].se += v;   // 存在次大值才加，避免 -1e18 哨兵误判
         t[p].sum += v * (r - l + 1);
         t[p].add += v;
     }
@@ -393,8 +393,13 @@ struct MergeSegTree {
     void split(int p, int l, int r, long long k, int &lch, int &rch) {  // 前 k 小到左树
         if (!p) { lch = rch = 0; return; }
         if (l == r) {
+            if (k == 0) { lch = 0; rch = p; return; }
             lch = p; rch = 0;
             t[lch].sum = k;
+            if (k < t[p].sum) {                // 劈开叶子：剩余部分归右树
+                rch = new_node();
+                t[rch].sum = t[p].sum - k;
+            }
             return;
         }
         lch = new_node(); rch = new_node();
