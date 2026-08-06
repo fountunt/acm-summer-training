@@ -23,7 +23,7 @@ using a4 = array<ll, 4>;
 using a5 = array<ll, 5>;
 
 const int MOD = 1e9+7;
-const int INF = 1e18;
+const ll INF = 1e18;
 const ld EPS = 1e-12;
 const ld PI = acos(-1.0);
 
@@ -739,6 +739,41 @@ void floyd(int n, vector<vector<long long>>& d) {
     }
 }
 
+//=================== 并查集 (DSU) =======================================
+struct DSU {
+    vector<int> fa;
+    // vector<bool> has_cycle; // has_cycle[i] 表示以 i 为根的连通块内是否存在环
+    //// int block_cnt;
+    DSU(int n) {
+        fa.resize(n + 1);
+        // has_cycle.assign(n + 1, false);
+        //// block_cnt = n;
+        for (int i = 1; i <= n; i++) fa[i] = i;
+    }
+    int find(int x) {
+        return fa[x] == x ? x : fa[x] = find(fa[x]);
+    }
+    bool unite(int x, int y) {
+        x = find(x), y = find(y);
+        if (x == y) {
+            // has_cycle[x] = true; // 同一连通块内再连边，该连通块成环
+            return false;
+        }
+        fa[y] = x;
+        // has_cycle[x] = has_cycle[x] || has_cycle[y]; 
+        //// block_cnt--;
+        return true;
+    }
+
+    bool connected(int x, int y) {
+        return find(x) == find(y);
+    }
+    // bool node_in_cycle(int x) {
+    //     return has_cycle[find(x)];
+    // }
+    //// int get_block() const { return block_cnt; }
+};
+
 //=================== Kruskal 算法 =======================================
 // n: 点数, edges: 所有的无向边列表
 // 返回: {MST 总权值, MST 选中的边集}
@@ -807,41 +842,6 @@ long long prim(int n, const vector<vector<Edge>>& adj) {
     if (cnt != n) return -1; // 不连通
     return total_weight;
 }
-
-//=================== 并查集 (DSU) =======================================
-struct DSU {
-    vector<int> fa;
-    // vector<bool> has_cycle; // has_cycle[i] 表示以 i 为根的连通块内是否存在环
-    //// int block_cnt;
-    DSU(int n) {
-        fa.resize(n + 1);
-        // has_cycle.assign(n + 1, false);
-        //// block_cnt = n;
-        for (int i = 1; i <= n; i++) fa[i] = i;
-    }
-    int find(int x) {
-        return fa[x] == x ? x : fa[x] = find(fa[x]);
-    }
-    bool unite(int x, int y) {
-        x = find(x), y = find(y);
-        if (x == y) {
-            // has_cycle[x] = true; // 同一连通块内再连边，该连通块成环
-            return false;
-        }
-        fa[y] = x;
-        // has_cycle[x] = has_cycle[x] || has_cycle[y]; 
-        //// block_cnt--;
-        return true;
-    }
-
-    bool connected(int x, int y) {
-        return find(x) == find(y);
-    }
-    // bool node_in_cycle(int x) {
-    //     return has_cycle[find(x)];
-    // }
-    //// int get_block() const { return block_cnt; }
-};
 
 //=================== 可撤销并查集 (RDSU) ================================
 struct RDSU {
