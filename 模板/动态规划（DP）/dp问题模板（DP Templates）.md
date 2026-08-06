@@ -268,6 +268,60 @@ int solve(int x) {
 // 调用: solve(R) - solve(L - 1)
 ```
 
+### 带加法进位的数位 DP（从低到高，聚合量技巧）
+
+> 上面的 tight 版处理"上界"；但当要统计 `x + d` 的某性质时，进位只能**从低位向高位**处理。
+> 若同时还有上界约束，常用技巧是把 `[0,n]` 拆成 O(log n) 个**二元区间** `[h, h+2^k-1]`
+> （h 是 2^k 的倍数，区间内低 k 位完全自由），每个区间只需处理进位、无需上界。
+>
+> 求 `Σ popcount(i)·popcount(i+d)` 时，不必枚举全部 i，维护四个聚合量即可：
+> `cnt`（个数）、`pct`（Σpopcount(t)）、`pcs`（Σpopcount(低位和)）、`prod`（Σ 两者乘积）。
+
+```cpp
+// 来源：牛客多校「整数函数」。Σ_{i=0}^{n} popcount(i)·popcount(i+d) mod 998244353
+#include <bits/stdc++.h>
+using namespace std;
+typedef unsigned long long ull;
+const long long MOD = 998244353;
+int pc(ull x){ return __builtin_popcountll(x); }
+
+// Σ_{t=0}^{2^k-1} popcount(h+t)·popcount(h+t+d)，h 为 2^k 的倍数
+long long blockSum(ull h, int k, ull d){
+    long long a = pc(h) % MOD;              // popcount(h)（h 低 k 位为 0）
+    ull H = h + d;
+    ull H_high = H >> k;                    // H+t 的高位（进位后可能 +1）
+    long long cnt[2]={0}, pct[2]={0}, pcs[2]={0}, prod[2]={0};
+    cnt[0] = 1;                             // 初始进位 0
+    for(int p = 0; p < k; p++){
+        long long db = (d >> p) & 1ULL;
+        long long nc[2]={0}, np[2]={0}, ns[2]={0}, npr[2]={0};
+        for(int c=0;c<2;c++) for(int tb=0;tb<2;tb++){
+            long long s3 = tb + db + c;     // t 位 + d 位 + 进位
+            long long s  = s3 & 1;          // (H+t) 的第 p 位
+            int c2 = (s3 >= 2);             // 进位出
+            nc[c2]  = (nc[c2]  + cnt[c]) % MOD;
+            np[c2]  = (np[c2]  + pct[c] + tb*cnt[c]) % MOD;
+            ns[c2]  = (ns[c2]  + pcs[c] + s*cnt[c]) % MOD;
+            npr[c2] = (npr[c2] + prod[c] + tb*pcs[c] + s*pct[c] + (tb&s)*cnt[c]) % MOD;
+        }
+        memcpy(cnt,nc,sizeof cnt); memcpy(pct,np,sizeof pct);
+        memcpy(pcs,ns,sizeof pcs); memcpy(prod,npr,sizeof npr);
+    }
+    long long res = 0;
+    for(int c=0;c<2;c++){ long long b = pc(H_high + c) % MOD; res = (res + a*pcs[c] + pct[c]*b + a*b*cnt[c] + prod[c]) % MOD; }
+    return res;
+}
+// 把 [0,n] 按集合位 k 拆成二元区间，再求和（另加 i=n 这一项）
+long long solve(ull n, ull d){
+    long long ans = (long long)((ull)pc(n) * pc(n+d)) % MOD;
+    for(int k=0;k<60;k++) if((n >> k) & 1ULL){ ull h=(n>>(k+1))<<(k+1); ans=(ans+blockSum(h,k,d))%MOD; }
+    return ans;
+}
+```
+
+**要点**：`[0,n]` 的二元区间拆分为：对 n 的每个集合位 k，取 `h = (n>>(k+1))<<(k+1)`，
+得到块 `[h, h+2^k-1]`（低 k 位自由），并上 `{n}` 恰好覆盖 `[0,n]`。
+
 ---
 
 ## 六、状压 DP（Bitmask DP）
@@ -368,6 +422,49 @@ cout << dp[(1 << m) - 1] << "\n";
 ```
 
 > **要点**：SOS DP 把每个特征掩码的总费用按子集归属聚合好，状压 DP 枚举未选特征用 `lsb` 技巧使内层 O(m) → O(popcount(rem))，总复杂度 O(m·2^m + 2^m)。
+
+### 子集 DP 统计偏序线性扩展（排列 / 拓扑序计数）
+
+适用：统计满足若干 `a 必须在 b 之前` 约束的排列（线性扩展）个数。元素数 n ≤ 20~26。
+`dp[mask]` = 已安排好 `mask` 中元素（排在最前）的方案数；`x` 能加入当且仅当 `x` 的所有前驱都在 `mask` 中。
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+// 来源：牛客多校「字母表」。统计满足 26 个字母先后约束的字母表数，mod 2^32
+// pred[x]：必须排在 x 前面的字母的位掩码
+unsigned count_linear_extensions(int n, const unsigned pred[]) {
+    unsigned full = (1u << n) - 1;
+    vector<unsigned> dp(full + 1, 0);
+    dp[0] = 1;
+    for (unsigned mask = 0; mask <= full; ++mask) {
+        unsigned dv = dp[mask];
+        if (dv == 0) continue;
+        unsigned rem = full ^ mask;              // 未安排的元素
+        while (rem) {
+            int x = __builtin_ctz(rem);
+            rem &= rem - 1;
+            if ((pred[x] & mask) == pred[x])     // x 的所有前驱已就位
+                dp[mask | (1u << x)] += dv;
+        }
+    }
+    return dp[full];                             // 有环则自然为 0
+}
+```
+
+**自由元素因子**：若 n 个元素里只有 m 个被约束，其余自由，则 `答案 = L × (m+1)(m+2)···n`
+（L 为子集 DP 结果）。用乘积而非除法，避免取模下不能整除的问题。
+
+### 层叠区间计数（laminar intervals）— O(k log k)
+
+适用：把 k 个值放进 k 个槽位，每个值 v 被限制在区间 `[L_v,R_v]` 内，且这些区间两两**不相交或互相包含**（层叠）。
+此时合法双射数 = 按区间长度升序处理每个值，`v` 的可选槽位数 = `|I_v| − (严格包含于 I_v 的值的个数 + 同区间内排在 v 前面的个数)`。
+
+```cpp
+// 来源：牛客多校「排列问题」。每个值的可达槽位是层叠区间，用区间包含树统计子树大小即可
+// 处理顺序：按区间长度升序（同区间按值下标），
+// cnt = 已处理且区间 ⊆ [L_v,R_v] 的值的个数，v 的贡献 = |I_v| - cnt。
+```
 
 ---
 
