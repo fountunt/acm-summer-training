@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(gdb -q ./122A.exe)"
-    ]
-  }
-}
