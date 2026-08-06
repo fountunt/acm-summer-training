@@ -1,0 +1,1 @@
+{"name":"Local: A","url":"c:\\acm-summer-training\\morning_training\\7.27pws\\A.cpp","tests":[{"id":1785213075007,"input":"5\n2 2\n1 1\n1 -1\n2 1\n1 1\n1 -1\n2 3\n1 1\n1 -1\n2 0\n2 3\n4 5\n2 1\n4 3\n6 5","output":""}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\acm-summer-training\\morning_training\\7.27pws\\A.cpp","group":"local","local":true}

@@ -1,0 +1,1 @@
+{"name":"Local: 2225C","url":"c:\\acm-summer-training\\codeforces\\Topic\\DP\\2225C.cpp","tests":[{"id":1784376709918,"input":"5\n1\nR\nR\n2\nBR\nBR\n3\nRBR\nBRB\n4\nRRBB\nBBRB\n5\nRBRBR\nBBBRB\n","output":""}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\acm-summer-training\\codeforces\\Topic\\DP\\2225C.cpp","group":"local","local":true}

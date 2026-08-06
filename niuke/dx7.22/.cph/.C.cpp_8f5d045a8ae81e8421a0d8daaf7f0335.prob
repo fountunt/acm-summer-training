@@ -1,0 +1,1 @@
+{"name":"Local: C","url":"c:\\acm-summer-training\\niuke\\dx7.22\\C.cpp","tests":[{"id":1784710395375,"input":"4\n21 1 1 10 5\n21 19 20 22 21\n21 16 19 21 19\n21 9 12 22 20","output":""}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\acm-summer-training\\niuke\\dx7.22\\C.cpp","group":"local","local":true}

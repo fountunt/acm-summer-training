@@ -1,0 +1,1 @@
+{"name":"Local: 1200D","url":"c:\\acm-summer-training\\codeforces\\Difference Array\\1200D.cpp","tests":[{"id":1783682931628,"input":"4 2\nBWWW\nWBBW\nWBBW\nWWWB\n","output":"4"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\acm-summer-training\\codeforces\\Difference Array\\1200D.cpp","group":"local","local":true}

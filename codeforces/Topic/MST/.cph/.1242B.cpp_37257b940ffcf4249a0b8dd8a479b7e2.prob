@@ -1,0 +1,1 @@
+{"name":"Local: 1242B","url":"c:\\acm-summer-training\\codeforces\\MST\\1242B.cpp","tests":[{"id":1783943583934,"input":"6 11\n1 3\n1 4\n1 5\n1 6\n2 3\n2 4\n2 5\n2 6\n3 4\n3 5\n3 6\n","output":""}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\acm-summer-training\\codeforces\\MST\\1242B.cpp","group":"local","local":true}
