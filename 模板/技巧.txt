@@ -1,2 +1,5 @@
 1.异或前缀和求解灯泡亮暗问题（模拟区间0-1反转）可以转化为前缀和求不变量来快速求解 morning_training\7.27pws\M.cpp
 2.按位拆解+超递增权重+掩码可行性贪心（操作花费=数值、可任意作用于子集时，拆成买位模型；高→低贪心删位+固定掩码可行性判定） 模板\技巧（Tricks）\位运算与掩码可行性贪心（Bit Ops & Mask Greedy）.md
+3.异或约束图传播（变量=节点、约束 x⊕y=c 当无向边权，BFS 沿 val[v]=val[u]^w 传遍全图；每个询问须给全两条约束） 模板\图论（Graph）\异或约束图传播（XOR Constraint Graph Propagation）.md
+4.取模构造：x = y + z（要构造 x mod z = y 时令 x=y+z 且 y<z；中心点+互补对不重不漏覆盖整数集） 模板\技巧（Tricks）\取模构造：x = y + z（Modulo via Sum）.md
+5.排列队首删除与指针均摊（两排列反复取队首删除，dead 标记+单方向光标均摊 O(n)；前缀闭环判定 max(posQ(P[1..i]))==i） 模板\技巧（Tricks）\排列队首删除与指针均摊（Queue-Front Removal & Pointer Amortization）.md
