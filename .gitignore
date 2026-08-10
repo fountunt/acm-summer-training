@@ -36,3 +36,9 @@ codeforces/competition/1113/
 # IDE / tool configs (local only, not uploaded)
 .vscode/
 .claude/
+
+# VSCode C/C++ 调试配置(本机专用,不上传;即使将来去掉上面的 .vscode/ 兜底,这些也始终被忽略)
+.vscode/settings.json
+.vscode/c_cpp_properties.json
+.vscode/launch.json
+.vscode/tasks.json
