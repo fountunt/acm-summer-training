@@ -1,21 +1,37 @@
+# Linux compiled binaries (no extension, e.g. G.cpp -> ./G), recursive
+**/*
+!**/
+!**/*.*
+
 # Windows executables
 *.exe
 
 # VSCode settings (keep your personal settings local)
 .vscode/settings.local.json
 
+# Compiled binaries
+*.o
+*.out
+*.obj
+*.class
+*.dll
+*.pdb
+
+# Documents / problem statements
+*.pdf
+
+# Logs / temporary files
+*.log
+*.tmp
+*.bak
+
 # Competitive Programming Helper (CPH) cache files
 .cph/
 divyanshuagrawal.competitive-programming-helper/
 
-# Compiled binaries
-*.o
-*.out
-
-# Linux compiled binaries (no extension, e.g. G.cpp -> ./G), recursive
-**/*
-!**/
-!**/*.*
+# Pending local work, not yet ready to share
+codeforces/competition/1113/
+模板/
 
 # IDE / tool configs (local only, not uploaded)
 .vscode/
