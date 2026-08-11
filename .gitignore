@@ -13,6 +13,9 @@
 *.o
 *.out
 *.obj
+
+# 对拍随机数据(data.in / wa/case_*.in)
+*.in
 *.class
 *.dll
 *.pdb
