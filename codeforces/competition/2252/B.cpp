@@ -1,29 +1,45 @@
 #include <bits/stdc++.h>
 using namespace std;
+using ll = long long;
 
-int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
+int main(){
     int t;
     cin >> t;
-    while (t--) {
+    while(t--){
         int n;
+        cin >> n;
         string s;
-        cin >> n >> s;
+        cin >> s;
 
-        int cnt0 = 0, cnt1 = 0;
-        for (char c : s) {
-            if (c == '0') cnt0++;
-            else cnt1++;
+        int n0 = 0,n1 = 0;
+        for(int i = 0;i < n;i++){
+            if(s[i] == '0') n0++;
+            else n1++;
         }
 
-        int ans = 0;
-        if (abs(cnt0 - cnt1) > 1) {
-            ans = (abs(cnt0 - cnt1) - 1) * 2;
+        int diff = n0 - n1;
+        if(abs(diff) > 2){
+            cout << -1 << "\n";
+            continue;
         }
 
-        cout << ans << '\n';
+        int l = 1;
+        int l0 = (s[0] == '0' ? 1 : 0);
+        int l1 = (s[0] == '1' ? 1 : 0);
+
+
+        for(int i = 1;i < n;i++){
+            if(s[i] != s[i-1]){
+                l++;
+                if(s[i] == '0') l0++;
+                else l1++;
+            }
+        }
+
+        int diff1 = l0 - l1;
+
+        int ans = n - l + max(0, abs(diff - diff1) - 1);
+
+        cout << ans << "\n";
     }
-    return 0;
 }
