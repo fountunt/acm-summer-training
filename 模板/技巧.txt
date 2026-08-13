@@ -3,3 +3,4 @@
 3.异或约束图传播（变量=节点、约束 x⊕y=c 当无向边权，BFS 沿 val[v]=val[u]^w 传遍全图；每个询问须给全两条约束） 模板\图论（Graph）\异或约束图传播（XOR Constraint Graph Propagation）.md
 4.取模构造：x = y + z（要构造 x mod z = y 时令 x=y+z 且 y<z；中心点+互补对不重不漏覆盖整数集） 模板\技巧（Tricks）\取模构造：x = y + z（Modulo via Sum）.md
 5.排列队首删除与指针均摊（两排列反复取队首删除，dead 标记+单方向光标均摊 O(n)；前缀闭环判定 max(posQ(P[1..i]))==i） 模板\技巧（Tricks）\排列队首删除与指针均摊（Queue-Front Removal & Pointer Amortization）.md
+6.游程重分配可达计数（翻转两端字符相同的子串=同色游程间总长任意重分配；游程颜色序列与每色 cnt/runs 不变且两组独立，答案=C(cnt0-1,runs0-1)·C(cnt1-1,runs1-1) 含组合数取模预处理） 模板\技巧（Tricks）\游程重分配可达计数（Run-Length Redistribution Count）.md
